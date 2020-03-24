@@ -4,7 +4,10 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import com.google.gson.Gson;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -24,6 +27,7 @@ public class MainActivity extends AppCompatActivity{
         setContentView(R.layout.activity_main);
 
         final TextView textView = (TextView) findViewById(R.id.textView);
+        final ProgressBar progressBar = (ProgressBar) findViewById(R.id.progressBar);
         OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder().url("https://catfact.ninja/fact").build();
         client.newCall(request).enqueue(new Callback() {
@@ -39,7 +43,10 @@ public class MainActivity extends AppCompatActivity{
                 } else {
                     ResponseBody responseBody = response.body();
                     if(responseBody != null) {
-                        textView.setText(responseBody.string());
+                        Gson gson = new Gson();
+                        CatFact catFact = gson.fromJson(responseBody.string(), CatFact.class);
+                        textView.setText(catFact.fact);
+                        progressBar.setVisibility(View.INVISIBLE);
                     }
 
                 }

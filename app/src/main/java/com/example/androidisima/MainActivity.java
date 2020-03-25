@@ -2,6 +2,9 @@ package com.example.androidisima;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
 import android.view.View;
@@ -14,25 +17,37 @@ import java.io.IOException;
 
 
 public class MainActivity extends AppCompatActivity {
-    TextView textView;
-    ProgressBar progressBar;
+    private ProgressBar progressBar;
+    private RecyclerView recyclerView;
+    private RecyclerView.Adapter mAdapter;
+    private CatFacts myDataset;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        textView = findViewById(R.id.textView);
         progressBar = findViewById(R.id.progressBar);
 
+
         MyViewModel model = new ViewModelProvider(this).get(MyViewModel.class);
-        final Observer<CatFact> observer = new Observer<CatFact>() {
+        final Observer<CatFacts> observer = new Observer<CatFacts>() {
             @Override
-            public void onChanged(CatFact catFact) {
+            public void onChanged(CatFacts catFacts) {
                 progressBar.setVisibility(View.INVISIBLE);
-                textView.setText(catFact.fact);
+                myDataset = catFacts;
+                mAdapter = new MyAdapter(myDataset);
+                recyclerView.setAdapter(mAdapter);
             }
         };
         model.getFact().observe(this, observer);
+
+        recyclerView = findViewById(R.id.recyclerView);
+        recyclerView.setHasFixedSize(true);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.addItemDecoration(new DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.VERTICAL));
+
+
     }
 
 }

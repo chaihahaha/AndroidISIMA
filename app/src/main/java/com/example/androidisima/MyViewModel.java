@@ -18,13 +18,13 @@ import okhttp3.ResponseBody;
 
 
 public class MyViewModel extends ViewModel {
-    private MutableLiveData<CatFact> catFact = null;
-    public MutableLiveData<CatFact> getFact(){
-        if(catFact == null) {
-            catFact = new MutableLiveData<>();
+    private MutableLiveData<CatFacts> catFacts = null;
+    public MutableLiveData<CatFacts> getFact(){
+        if(catFacts == null) {
+            catFacts = new MutableLiveData<>();
             // request fact only when it's not requested yet
             OkHttpClient client = new OkHttpClient();
-            Request request = new Request.Builder().url("https://catfact.ninja/fact").build();
+            Request request = new Request.Builder().url("https://catfact.ninja/facts?limit=15").build();
             client.newCall(request).enqueue(new Callback() {
                 @Override
                 public void onFailure(@NotNull Call call, @NotNull IOException e) {
@@ -39,7 +39,8 @@ public class MyViewModel extends ViewModel {
                         ResponseBody responseBody = response.body();
                         if(responseBody != null) {
                             Gson gson = new Gson();
-                            catFact.postValue(gson.fromJson(responseBody.string(), CatFact.class));
+                            CatFacts facts = gson.fromJson(responseBody.string(), CatFacts.class);
+                            catFacts.postValue(facts);
                         }
 
                     }
@@ -47,7 +48,7 @@ public class MyViewModel extends ViewModel {
             });
         }
 
-        return catFact;
+        return catFacts;
 
     }
 }

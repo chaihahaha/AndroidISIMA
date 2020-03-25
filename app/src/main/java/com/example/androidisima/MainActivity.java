@@ -1,5 +1,6 @@
 package com.example.androidisima;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.os.Bundle;
@@ -9,8 +10,10 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import java.io.IOException;
 
-public class MainActivity extends AppCompatActivity implements OnTaskCompleted{
+
+public class MainActivity extends AppCompatActivity {
     TextView textView;
     ProgressBar progressBar;
     @Override
@@ -22,14 +25,14 @@ public class MainActivity extends AppCompatActivity implements OnTaskCompleted{
         progressBar = findViewById(R.id.progressBar);
 
         MyViewModel model = new ViewModelProvider(this).get(MyViewModel.class);
+        final Observer<CatFact> observer = new Observer<CatFact>() {
+            @Override
+            public void onChanged(CatFact catFact) {
+                progressBar.setVisibility(View.INVISIBLE);
+                textView.setText(catFact.fact);
+            }
+        };
+        model.getFact().observe(this, observer);
+    }
 
-        // execute async task
-        GetFactTask task = new GetFactTask(this);
-        task.execute(model);
-    }
-    @Override  // called in GetFactTask.onPostExecute()
-    public void onTaskCompleted(String fact){
-        textView.setText(fact);
-        progressBar.setVisibility(View.INVISIBLE);
-    }
 }

@@ -1,5 +1,6 @@
 package com.example.androidisima;
 
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.google.gson.Gson;
@@ -17,29 +18,36 @@ import okhttp3.ResponseBody;
 
 
 public class MyViewModel extends ViewModel {
-    private CatFact catFact = null;
-    public String getFact() throws IOException {
+    private MutableLiveData<CatFact> catFact = null;
+    public MutableLiveData<CatFact> getFact(){
         if(catFact == null) {
+            catFact = new MutableLiveData<>();
             // request fact only when it's not requested yet
             OkHttpClient client = new OkHttpClient();
             Request request = new Request.Builder().url("https://catfact.ninja/fact").build();
-            Response response = client.newCall(request).execute();
-            if(!response.isSuccessful()){
-                throw new IOException(response.toString());
-            } else {
-                ResponseBody responseBody = response.body();
-                if (responseBody != null) {
-                    Gson gson = new Gson();
-                    catFact = gson.fromJson(responseBody.string(), CatFact.class);
-                    System.out.println("===============" + catFact.fact);
+            client.newCall(request).enqueue(new Callback() {
+                @Override
+                public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                    e.printStackTrace();
                 }
-            }
+
+                @Override
+                public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                    if(!response.isSuccessful()){
+                        throw new IOException(response.toString());
+                    } else {
+                        ResponseBody responseBody = response.body();
+                        if(responseBody != null) {
+                            Gson gson = new Gson();
+                            catFact.postValue(gson.fromJson(responseBody.string(), CatFact.class));
+                        }
+
+                    }
+                }
+            });
         }
-        if(catFact != null) {
-            return catFact.fact;
-        }
-        else {
-            return "ERROR";
-        }
+
+        return catFact;
+
     }
 }

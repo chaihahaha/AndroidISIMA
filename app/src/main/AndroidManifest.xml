@@ -18,11 +18,6 @@
             </intent-filter>
         </activity>
         <activity android:name="com.example.androidisima.FactDetailActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.GET_CONTENT" />
-
-                <category android:name="android.intent.category.INFO" />
-            </intent-filter>
         </activity>
     </application>
 

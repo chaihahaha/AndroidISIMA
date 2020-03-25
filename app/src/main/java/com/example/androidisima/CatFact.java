@@ -1,6 +1,8 @@
 package com.example.androidisima;
 
-public class CatFact {
+import java.util.Observable;
+
+public class CatFact extends Observable {
     public String fact;
     public int length;
 }

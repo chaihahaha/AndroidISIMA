@@ -1,5 +1,7 @@
 package com.example.androidisima;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
+
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -7,50 +9,27 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.google.gson.Gson;
 
-import org.jetbrains.annotations.NotNull;
-
-import java.io.IOException;
-
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
-import okhttp3.ResponseBody;
-
-public class MainActivity extends AppCompatActivity{
+public class MainActivity extends AppCompatActivity implements OnTaskCompleted{
+    TextView textView;
+    ProgressBar progressBar;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        final TextView textView = (TextView) findViewById(R.id.textView);
-        final ProgressBar progressBar = (ProgressBar) findViewById(R.id.progressBar);
-        OkHttpClient client = new OkHttpClient();
-        Request request = new Request.Builder().url("https://catfact.ninja/fact").build();
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                e.printStackTrace();
-            }
+        textView = findViewById(R.id.textView);
+        progressBar = findViewById(R.id.progressBar);
 
-            @Override
-            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-                if(!response.isSuccessful()){
-                    throw new IOException(response.toString());
-                } else {
-                    ResponseBody responseBody = response.body();
-                    if(responseBody != null) {
-                        Gson gson = new Gson();
-                        CatFact catFact = gson.fromJson(responseBody.string(), CatFact.class);
-                        textView.setText(catFact.fact);
-                        progressBar.setVisibility(View.INVISIBLE);
-                    }
+        MyViewModel model = new ViewModelProvider(this).get(MyViewModel.class);
 
-                }
-            }
-        });
+        // execute async task
+        GetFactTask task = new GetFactTask(this);
+        task.execute(model);
+    }
+    @Override  // called in GetFactTask.onPostExecute()
+    public void onTaskCompleted(String fact){
+        textView.setText(fact);
+        progressBar.setVisibility(View.INVISIBLE);
     }
 }

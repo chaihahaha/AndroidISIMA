@@ -1,7 +1,13 @@
 package com.example.androidisima;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
+import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.Fragment;
+import androidx.navigation.NavController;
+import androidx.navigation.NavDirections;
+import androidx.navigation.Navigation;
+import androidx.navigation.fragment.NavHostFragment;
+import androidx.navigation.ui.AppBarConfiguration;
+import androidx.navigation.ui.NavigationUI;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -16,39 +22,27 @@ import android.widget.TextView;
 import java.io.IOException;
 
 
-public class MainActivity extends AppCompatActivity {
-    private ProgressBar progressBar;
-    private RecyclerView recyclerView;
-    private RecyclerView.Adapter mAdapter;
-    private CatFacts myDataset;
-    public static final String EXTRA_MESSAGE = "com.example.androidisima.MESSAGE";
+public class MainActivity extends AppCompatActivity implements ListFragment.OnListFragmentInteractionListener {
+    AppBarConfiguration appBarConfiguration;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        progressBar = findViewById(R.id.progressBar);
-
-
-        MyViewModel model = new ViewModelProvider(this).get(MyViewModel.class);
-        final Observer<CatFacts> observer = new Observer<CatFacts>() {
-            @Override
-            public void onChanged(CatFacts catFacts) {
-                progressBar.setVisibility(View.INVISIBLE);
-                myDataset = catFacts;
-                mAdapter = new MyAdapter(myDataset);
-                recyclerView.setAdapter(mAdapter);
-            }
-        };
-        model.getFact().observe(this, observer);
-
-        recyclerView = findViewById(R.id.recyclerView);
-        recyclerView.setHasFixedSize(true);
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
-        recyclerView.setLayoutManager(layoutManager);
-        recyclerView.addItemDecoration(new DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.VERTICAL));
-
-
+        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
+        appBarConfiguration = new AppBarConfiguration.Builder(navController.getGraph()).build();
+        NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
+    }
+    @Override
+    public void onListFragmentInteraction(CatFact item){
+        Fragment navHost = getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment);
+        NavDirections action = ListFragmentDirections.actionListFragmentToDetailFragment(item.fact);
+        NavHostFragment.findNavController(navHost).navigate(action);
+    }
+    @Override
+    public boolean onSupportNavigateUp() {
+        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
+        return NavigationUI.navigateUp(navController, appBarConfiguration)
+                || super.onSupportNavigateUp();
     }
 
 }
